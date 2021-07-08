@@ -1,0 +1,443 @@
+///////////////////////////////// CREAR TABLAS 
+
+create table Gimnasios(
+    id_Gimnasio int(10) not null auto_increment primary key,
+    nombre varchar(45) not null,
+    telefono varchar(45) not null,
+    direccion varchar(45) not null
+    );
+create table Huellas(
+    id_Huella int(10) not null auto_increment primary key,
+    cod_huella varchar(45) not null
+    );
+create table Roles(
+    id_Rol int(10) not null auto_increment primary key,
+    rol varchar(45)
+    );
+create table Gimnasio_Roles(
+    id_Rol_gym int(10) not null auto_increment PRIMARY KEY,
+    id_gym int(10) not null,
+    id_rol int(10) not null,
+    FOREIGN KEY (id_gym) REFERENCES Gimnasios(id_Gimnasio) on DELETE CASCADE on UPDATE CASCADE,
+    FOREIGN KEY (id_rol) REFERENCES Roles(id_rol) on DELETE CASCADE on UPDATE CASCADE);
+    
+create table Turnos(
+    id_Turno int(10) not null auto_increment primary key,
+    nombre varchar(45) not null,
+    h_entrada time not null,
+    H_salida time not null);
+create table DatosEmpleado(
+    id_Dato int(10) not null auto_increment primary key,
+    nombre varchar(45) not null,
+    telefono varchar(45) not null,
+    direccion varchar(45) not null,
+    estado bool,
+    id_Rol int(10) not null,
+    id_Huella int(10) not null,
+    id_Turno int(10) not null,
+    id_Gimnasio int(10) not null,
+    foreign key (id_Rol) references Roles(id_Rol) on delete cascade on update cascade,
+    foreign key (id_Huella) references Huellas(id_Huella) on delete cascade on update cascade,
+    foreign key (id_Turno) references Turnos(id_Turno) on delete cascade on update cascade,
+    foreign key (id_Gimnasio) references Gimnasios(id_Gimnasio) on delete cascade on update cascade
+    );
+    
+create table Recepcion(
+    id_Recepcion int(10) not null auto_increment primary key,
+    carrera varchar(45) not null,
+    id_Empleado int(10) not null,
+    foreign key (id_Empleado) references DatosEmpleado(id_Dato) on delete cascade on update cascade
+    );
+create table Instructor(
+    id_Instructor int(10) not null auto_increment primary key,
+    certificacion varchar(45) not null,
+    id_Empleado int(10) not null,
+    foreign key (id_Empleado) references DatosEmpleado(id_Dato) on delete cascade on update cascade
+    );
+create table Limpieza(
+    id_Limpieza int(10) not null auto_increment primary key,
+    solicitud varchar(45) not null,
+    id_Empleado int(10) not null,
+    foreign key (id_Empleado) references DatosEmpleado(id_Dato) on delete cascade on update cascade
+    );
+CREATE TABLE Documentos_Rol(
+    id_DocR int(10) not null auto_increment primary key,
+    documento varchar(45) not null,
+    id_Empleado int(10) not null,
+    id_Rol int(10) not null,
+    foreign key (id_Empleado) references DatosEmpleado(id_Dato) on delete cascade on update cascade,
+    foreign key (id_Rol) references Roles(id_Rol) on delete cascade on update cascade
+    );
+    
+create table AccesoEmpleado(
+    id_AccEm int(10) not null auto_increment primary key,
+    fecha date not null,
+    h_entrada time NOT null,
+    id_Empleado int(10) not null,
+    foreign key (id_Empleado) references DatosEmpleado(id_Dato) on delete cascade on update cascade
+    );
+create table visitas(
+    id_Visita int(10) not null auto_increment primary key,
+    visita varchar(45),
+    pago decimal(10,2) not null,
+    h_entrada date,
+    id_Recepcionista int(10) not null,
+    foreign key (id_Recepcionista) references Recepcion(id_Recepcion) on delete cascade on update cascade
+    );
+CREATE TABLE Proveedores(
+    id_Proveedor int(10) not null auto_increment primary key,
+    proveedor varchar(45) not null,
+    h_entrada datetime not null,
+    pago_proveedor decimal(10,2) not null,
+    id_Recepcionista int(10) not null,
+    foreign key (id_Recepcionista) references Recepcion(id_Recepcion) on delete cascade on update cascade
+    );
+    
+CREATE TABLE peSuscripciones(
+	id_Suscripcion int(10) not null auto_increment primary key,
+    periodo varchar(45) not null,
+    duracion_dias int(10) not null,
+    costo decimal(10,2) not null,
+    id_Gimnasio int(10) not null,
+    foreign key (id_Gimnasio) references Gimnasios(id_Gimnasio) on delete cascade on update cascade
+    );
+    
+create table Clientes(
+    id_Cliente int(10) not null auto_increment primary key,
+    nombre varchar(45) not null,
+    telefono varchar(45) not null,
+    estado bool,
+    id_Huella int(10) not null,
+    id_Periodo int(10) not null,
+    id_Gimnasio int(10) not null,
+    foreign key (id_Huella) references Huellas(id_Huella) on delete cascade on update cascade,
+    foreign key (id_Periodo) references peSuscripciones(id_suscripcion) on delete cascade on update cascade,
+    foreign key (id_Gimnasio) references Gimnasios(id_Gimnasio) on delete cascade on update cascade
+    );
+create table AccesoCliente(
+    id_AccCl int(10) not null auto_increment primary key,
+    fecha datetime not null,
+    id_Cliente int(10) not null,
+    foreign key (id_Cliente) references Clientes(id_Cliente) on delete cascade on update cascade
+    );
+    
+CREATE TABLE Pagos_Historial(
+    id_Pago int(10) not null AUTO_INCREMENT PRIMARY KEY,
+    monto decimal(10,2) not null,
+    f_inicio date not null,
+    f_fin date not null,
+    id_Cliente int(10) not null,
+    foreign key (id_Cliente) references Clientes(id_Cliente) on delete cascade on update cascade
+    );
+
+////////////////////////////////////////// PROCEDURE showTablesEmpleados 
+delimiter //
+drop procedure if exists showTablesEmpleados //
+create procedure showTablesEmpleados()
+begin
+SELECT * from Gimnasios;
+SELECT * from Roles;
+SELECT * from Gimnasio_Roles;
+select * from datosEmpleado;
+select * from Recepcion;
+select * from Instructor;
+select * from Limpieza;
+select * from Documentos_Rol;
+end //
+delimiter ;
+
+///////////////////////////////////////// PROCEDURE ADD GIMNASIO
+delimiter //
+drop procedure if exists addGimnasio //
+create procedure addGimnasio(IN _nombre varchar(45), IN _telefono varchar(45), IN _direccion varchar(45))
+begin
+declare checkIdGym int(10);
+insert into Gimnasios (nombre, telefono, direccion) values (_nombre, _telefono, _direccion);
+set checkIdGym = (select max(id_Gimnasio) from Gimnasios);
+insert into Gimnasio_Roles (id_gym, id_rol) VALUES(checkIdGym, 1), (checkIdGym, 2), (checkIdGym, 3);
+end //
+delimiter ;
+
+
+///////////////////////////////////////// PROCEDURE ADD ROL --asignar rol a gimasio
+delimiter //
+drop procedure if exists addRol //
+create procedure addRol(IN _rol varchar(45), IN _gimnasio int(10))
+begin
+declare checkGym int(10);
+declare countIdRol int(10);
+declare checkRol int(10);
+set checkRol = (select id_Rol from roles where rol = _rol);
+set checkGym = (select id_Gimnasio from gimnasios where id_Gimnasio = _gimnasio);
+if (checkGym is null) then 
+select * from gimnasios;
+elseif (checkRol is not null) then 
+insert into gimnasio_roles (id_gym, id_rol) values (_gimnasio, checkRol);
+else 
+insert into Roles (rol) values (_rol);
+set countIdRol = (select max(id_Rol) from roles);
+insert into gimnasio_roles (id_gym, id_rol) values (_gimnasio, countIdRol);
+end if;
+end //
+delimiter ;
+
+////////////////////////////////////////PROCEDURE FORMULARIOeMPLEADO
+delimiter //
+drop procedure if exists formulario_Empleado //
+create procedure formulario_Empleado(IN _nombre varchar(45), IN _telefono varchar(45), IN _direccion varchar(45), IN _huella varchar(45), IN _rol int(10), IN _turno int(10), IN _documento varchar(45), IN _gimnasio int(10))
+begin
+declare checkGym int(10);
+declare checkRol int(10);
+declare checkhuella int(10);
+declare checkEmpleado int(10);
+declare checkTurno int(10);
+declare checkRolGym int(10);
+
+set checkGym = (select id_Gimnasio from gimnasios where id_Gimnasio = _gimnasio);
+set checkRol = (select id_Rol from roles where id_Rol = _rol);
+set checkTurno = (select id_Turno from Turnos where id_Turno = _turno);
+set checkRolGym = (select id_Rol_Gym from Gimnasio_Roles where id_gym =_gimnasio and id_rol = _rol);
+if (checkGym is null || checkRol is null || checkTurno  is null) then 
+select * from gimnasios;
+select * from roles;
+select * from Turnos;
+elseif (checkRolGym is null) then 
+#checando si el rol exixte en el gimnasio
+select * from Gimnasio_Roles;
+else 
+insert into huellas (cod_huella) values (_huella);
+set checkhuella = (select max(id_Huella) from huellas);
+insert into datosempleado (nombre, telefono, direccion, estado, id_Rol, id_Turno, id_Huella, id_Gimnasio) values (_nombre, _telefono, _direccion, 1, _rol, _turno, checkhuella, _gimnasio);
+set checkEmpleado = (select max(id_Dato) from datosempleado);
+
+case (_rol) 
+when (1) then 
+insert into recepcion(carrera, id_Empleado) values(_documento, checkEmpleado);
+when (2) then 
+insert into instructor(certificacion, id_Empleado) values(_documento, checkEmpleado);
+when (3) then 
+insert into limpieza(solicitud, id_Empleado) values(_documento, checkEmpleado);
+else 
+insert into documentos_rol(documento, id_empleado, id_rol) values(_documento, checkEmpleado, _rol);
+end case;
+
+end if;
+end //
+delimiter ;
+
+
+///////////////////////////// VIEW SELECTALLEMPLEADOS
+drop view if EXISTS View_selectAllEmpleados;
+CREATE VIEW View_selectAllEmpleados as 
+select Emp.id_Dato, Emp.nombre, Emp.telefono, Emp.direccion, Emp.estado as Status, Rol.rol, Rece.carrera as Documentos, Hu.cod_huella, Tu.h_entrada, Tu.H_salida, Gym.nombre as Gimnasio  
+from ((((datosempleado as Emp inner join roles as Rol on Emp.id_Rol = Rol.id_Rol)
+ inner join recepcion as Rece on Rece.id_Empleado = Emp.id_Dato)
+ inner join huellas as Hu  on Emp.id_Huella = Hu.id_Huella)
+  inner join turnos as Tu  on Emp.id_Turno = Tu.id_Turno)
+ INNER JOIN gimnasios AS Gym on Emp.id_Gimnasio = Gym.id_Gimnasio
+ UNION
+ select Emp.id_Dato, Emp.nombre, Emp.telefono, Emp.direccion, Emp.estado as Status, Rol.rol, Inst.certificacion , Hu.cod_huella, Tu.h_entrada, Tu.H_salida, Gym.nombre as Gimnasio  
+from ((((datosempleado as Emp inner join roles as Rol on Emp.id_Rol = Rol.id_Rol)
+ inner join instructor as Inst on Inst.id_Empleado = Emp.id_Dato)
+ inner join huellas as Hu  on Emp.id_Huella = Hu.id_Huella)
+  inner join turnos as Tu  on Emp.id_Turno = Tu.id_Turno)
+ INNER JOIN gimnasios AS Gym on Emp.id_Gimnasio = Gym.id_Gimnasio
+ UNION
+ select Emp.id_Dato, Emp.nombre, Emp.telefono, Emp.direccion, Emp.estado as Status, Rol.rol, Lim.solicitud, Hu.cod_huella, Tu.h_entrada, Tu.H_salida, Gym.nombre as Gimnasio  
+from ((((datosempleado as Emp inner join roles as Rol on Emp.id_Rol = Rol.id_Rol)
+ inner join limpieza as Lim on Lim.id_Empleado = Emp.id_Dato)
+ inner join huellas as Hu  on Emp.id_Huella = Hu.id_Huella)
+  inner join turnos as Tu  on Emp.id_Turno = Tu.id_Turno)
+ INNER JOIN gimnasios AS Gym on Emp.id_Gimnasio = Gym.id_Gimnasio
+ UNION
+ select Emp.id_Dato, Emp.nombre, Emp.telefono, Emp.direccion, Emp.estado as Status, Rol.rol, DR.documento, Hu.cod_huella, Tu.h_entrada, Tu.H_salida, Gym.nombre as Gimnasio  
+from ((((datosempleado as Emp inner join roles as Rol on Emp.id_Rol = Rol.id_Rol)
+ inner join documentos_rol as DR on DR.id_empleado = Emp.id_Dato)
+ inner join huellas as Hu  on Emp.id_Huella = Hu.id_Huella)
+  inner join turnos as Tu  on Emp.id_Turno = Tu.id_Turno)
+ INNER JOIN gimnasios AS Gym on Emp.id_Gimnasio = Gym.id_Gimnasio;
+
+/////////////////////////////PROCEDURE FORMULARIO CLIENTES //////////////////// 
+delimiter //
+drop procedure if exists formulario_Cliente //
+create procedure formulario_Cliente(IN _nombre varchar(45), IN _telefono varchar(45), IN _huella varchar(45), IN _periodo varchar(45), IN _gimnasio int(10) )
+begin 
+declare countGym int(10);
+declare countHuella int(10);
+declare checkIdGym int(10);
+set checkIdGym = (select id_Suscripcion from pesuscripciones where periodo = _periodo and id_Gimnasio = _gimnasio);
+set countGym = (select id_Gimnasio from Gimnasios where id_Gimnasio = _gimnasio);
+if (countGym is null) then 
+select * from Gimnasios;
+elseif (checkIdGym is null) then 
+SELECT * from pesuscripciones;
+else
+insert into Huellas(cod_huella) values (_huella);
+set countHuella = (select max(id_Huella) from huellas);
+insert into clientes (nombre, telefono, estado, id_Huella, id_Periodo, id_Gimnasio) values (_nombre, _telefono, 1, countHuella, checkIdGym, _gimnasio);
+end if;
+end //
+delimiter ;
+///////////////////////////////////VIEW SELECTALLCLIENTES
+
+drop view if EXISTS View_selectAllClientes ;
+create view View_selectAllClientes as
+select Cl.id_Cliente, Cl.nombre, Cl.telefono, Cl.estado, H.cod_huella, pS.periodo as Membresia, Gym.nombre as Gimnasio from 
+((clientes as Cl inner join huellas as H on Cl.id_Huella = H.id_Huella) 
+inner join gimnasios as Gym on Cl.id_Gimnasio = Gym.id_Gimnasio)
+INNER JOIN pesuscripciones as pS on Cl.id_Periodo = pS.id_Suscripcion;
+
+//////////////////////////////////VIEW SELECTALLRECEPCIONISTAS
+
+drop view if exists View_selectAllRecepcionistas;
+create view View_selectAllRecepcionistas as
+select Emp.id_Dato , Emp.nombre, Emp.telefono, Emp.direccion, Emp.estado as Status, Rol.rol, Rece.carrera as Doc, Hu.cod_huella, Tu.h_entrada, Tu.H_salida, Gym.nombre as Gimnasio  
+from ((((datosempleado as Emp inner join roles as Rol on Emp.id_Rol = Rol.id_Rol)
+ inner join recepcion as Rece on Rece.id_Empleado = Emp.id_Dato)
+ inner join huellas as Hu  on Emp.id_Huella = Hu.id_Huella)
+ inner join turnos as Tu  on Emp.id_Turno = Tu.id_Turno)
+ INNER JOIN gimnasios AS Gym on Emp.id_Gimnasio = Gym.id_Gimnasio;
+
+////////////////////////////////// FUNCTION ADDACCESOCLIENTE --pendiente
+delimiter //
+drop function if exists addAccesoCliente //
+create function addAccesoCliente(_idCliente int(10))
+returns varchar(45)
+begin 
+declare checkStatus bool;
+set checkStatus = (select estado from Clientes where id_Cliente = _idCliente);
+
+if (checkStatus = false) then 
+RETURN 'El usuario no tiene acceso';
+else 
+insert into accesocliente(id_Cliente) values(_idCliente);
+RETURN ' \'Acceso concedido\' ';
+end if;
+end //
+delimiter ;
+ 
+
+/////////////////////////////// FUNCTION ADDACCESOEMPLEADO
+
+delimiter //
+drop function if exists addAccesoEmpleado //
+create function addAccesoEmpleado(_idEmpleado int(10))
+returns varchar(45)
+begin 
+declare checkStatus bool;
+set checkStatus = (select estado from datosempleado where id_Dato = _idEmpleado);
+
+if (checkStatus = false) then 
+RETURN 'El usuario no tiene acceso';
+else 
+insert into accesoempleado(id_Empleado) values(_idEmpleado);
+RETURN ' \'Acceso concedido\' ';
+end if;
+end //
+delimiter ;
+
+///////////////////////////////PROCEDURE DELETEEMPLEADO --eliminacion fisica
+delimiter //
+drop procedure if exists deleteEmpleado //
+create procedure deleteEmpleado(IN _idEmpleado int(10))
+begin 
+declare checkIdHuella int(10);
+set checkIdHuella = (select id_Huella from datosempleado where id_Dato = _idEmpleado);
+delete from huellas where id_Huella = checkIdHuella;
+end //
+delimiter ;
+ 
+//////////////////////////////PROCEDURE DELETECLIENTE  --eliminacion fisica
+delimiter //
+drop procedure if exists deleteCliente //
+create procedure deleteCliente(IN _idCliente int(10))
+begin 
+declare checkIdHuella int(10);
+set checkIdHuella = (select id_Huella from clientes where id_Cliente = _idCliente);
+delete from huellas where id_Huella = checkIdHuella;
+end //
+delimiter ;
+ 
+////////////////////////////////PROCEDURE DISABLE EMPLEADO
+delimiter //
+drop procedure if exists disableEmpleado //
+create procedure disableEmpleado(IN _idEmpleado int(10))
+begin 
+
+update datosempleado set estado = false where id_Dato = _idEmpleado;
+
+end //
+delimiter ;
+
+///////////////////////////////////////PROCEDURE UNABLE EMPLEADO
+delimiter //
+drop procedure if exists unableEmpleado //
+create procedure unableEmpleado(IN _idEmpleado int(10))
+begin 
+
+update datosempleado set estado = true where id_Dato = _idEmpleado;
+
+end //
+delimiter ;
+////////////////////////////////////////PROCEDURE DISABLE CLIENTE
+delimiter //
+drop procedure if exists disableCliente //
+create procedure disableCliente(IN _idCliente int(10))
+begin 
+
+update clientes set estado = false where id_Cliente = _idCliente;
+
+end //
+delimiter ;
+
+////////////////////////////////////////PROCEDURE UNABLE CLIENTE
+delimiter //
+drop procedure if exists unableCliente //
+create procedure unableCliente(IN _idCliente int(10))
+begin 
+
+update clientes set estado = true where id_Cliente = _idCliente;
+
+end //
+delimiter ;
+ 
+//////////////////////////////////////// PROCEDURE EDITAR EMPLEADO
+delimiter //
+drop procedure if exists editarEmpleado //
+create procedure editarEmpleado(IN _id int(10), IN _campo varchar(45), IN _newCampo varchar(45))
+begin 
+
+if (_campo = 'nombre') then
+update datosempleado set nombre = _newCampo where id_Dato = _id;
+elseif (_campo = 'telefono') then 
+update datosempleado set telefono = _newCampo where id_Dato = _id;
+
+elseif (_campo = 'direccion')  then
+update datosempleado set direccion = _newCampo where id_Dato = _id;
+
+
+else
+select * from datosempleado;
+
+end if;
+
+end //
+delimiter ;
+
+
+///////////////////////////////////// PROCEDURE EDITAR CLIENTE
+
+delimiter //
+drop procedure if exists editarCliente //
+create procedure editarCliente(IN _id int(10), IN _campo varchar(45), IN _newCampo varchar(45))
+begin 
+if (_campo = 'nombre') then
+update clientes set nombre = _newCampo where id_Cliente = _id;
+elseif (_campo = 'telefono') then 
+update clientes set telefono = _newCampo where id_Cliente = _id;
+else
+select * from clientes;
+end if;
+end //
+delimiter ;
+
